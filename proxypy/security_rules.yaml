@@ -1,0 +1,9 @@
+server:
+  - "raspbian.raspberrypi.org"
+  - "archive.raspberrypi.org"
+clients:
+  - "xlocalhost"
+  - "picamera01.fritz.box"
+packages:
+ - "/dists/"
+ - "/pool/main/"

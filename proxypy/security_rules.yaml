@@ -1,9 +1,17 @@
+# who is allowed to use this service
+proxy:
+  http_proxy: "http://internet.company.com:83"
+  https_proxy: "http://internet.company.com:83"
+  no_proxy: "localhost,127.0.0.1,.company.com"
+
+clients:
+  - "localhost"
+  - "picamera01.fritz.box"
+# which repositories can they connect
 server:
   - "raspbian.raspberrypi.org"
   - "archive.raspberrypi.org"
-clients:
-  - "xlocalhost"
-  - "picamera01.fritz.box"
+# what can be download - regex 
 packages:
  - "/dists/"
  - "/pool/main/"

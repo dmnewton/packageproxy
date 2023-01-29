@@ -5,13 +5,18 @@ proxy:
   no_proxy: "localhost,127.0.0.1,.company.com"
 
 clients:
+  - "172.17.0.1"
   - "localhost"
   - "picamera01.fritz.box"
+  - "openhabian.fritz.box"
 # which repositories can they connect
 server:
+  - "deb.debian.org"
   - "raspbian.raspberrypi.org"
   - "archive.raspberrypi.org"
+  - "davesteele.github.io"
 # what can be download - regex 
 packages:
  - "/dists/"
  - "/pool/main/"
+ - "dajgdajhs"

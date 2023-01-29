@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
+#Python 3.11.1 (main, Jan 23 2023, 21:18:23) [GCC 10.2.1 20210110] on linux
+
 from time import time
 from xmlrpc.client import Boolean
 
-from attr import dataclass
+from dataclasses import dataclass
 import set_proxy
 
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -119,7 +121,7 @@ def on_modified(event):
         load_security()
 
 def load_security():
-    with open('proxypy/security_rules.yaml') as file:
+    with open('security_rules.yaml') as file:
         config_data_input = yaml.load(file, Loader=yaml.FullLoader)
 
     global config_data

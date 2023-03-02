@@ -121,7 +121,7 @@ def on_modified(event):
         load_security()
 
 def load_security():
-    with open('security_rules.yaml') as file:
+    with open('proxypy/security_rules.yaml') as file:
         config_data_input = yaml.load(file, Loader=yaml.FullLoader)
 
     global config_data

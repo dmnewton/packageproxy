@@ -2,8 +2,9 @@
 proxy:
   http_proxy: "http://internet.company.com:83"
   https_proxy: "http://internet.company.com:83"
-  no_proxy: "localhost,127.0.0.1,.company.com"
+  no_proxy: "localhost,127.0.0.1,.ford.com"
 
+# this might not work on GCP Container
 clients:
   - "172.17.0.1"
   - "localhost"
@@ -17,6 +18,9 @@ server:
   - "davesteele.github.io"
 # what can be download - regex 
 packages:
- - "/dists/"
- - "/pool/main/"
- - "dajgdajhs"
+  whitelist:
+  - "/dists/"
+  - "/pool/main/"
+  - "dajgdajhs"
+  blacklist:
+  - "dangerous"

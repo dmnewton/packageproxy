@@ -1,3 +1,7 @@
 httpserver
 pyyaml
 watchdog
+flask
+psycopg2-binary
+Flask-SQLAlchemy
+jsonify

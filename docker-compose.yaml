@@ -1,0 +1,57 @@
+version: "3.7"
+
+services:
+           
+    backend-service:
+        image: python-base
+        build:
+            dockerfile: Dockerfile
+            context: ./
+        working_dir: /app
+        command: python3 proxypy/proxy.py
+        restart: "no"
+        ports:
+             - 8899:8899
+        environment:
+            - TZ=Europe/Berlin
+            - https_proxy=*** your value ***
+            - http_proxy=*** your value ***
+            - no_proxy=**** your value ***
+        container_name: backend
+        volumes:
+            - ./:/app
+        depends_on:
+            db:
+                condition: service_healthy
+
+    pythonapp:
+        container_name: dbrestapi
+        image: python-base
+        working_dir: /app
+        command: python3 proxypy/db_api.py
+        ports:
+            - "5000:5000"
+        environment:
+            - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+        depends_on:
+            db:
+                condition: service_healthy
+        volumes:
+            - ./:/app
+    
+    db:
+        container_name: db
+        image: postgres:latest
+        command: postgres -c listen_addresses='*'
+        ports:
+        - "5432:5432"
+        environment:
+        - POSTGRES_PASSWORD=postgres
+        - POSTGRES_USER=postgres
+        - POSTGRES_DB=postgres
+        volumes:
+        - ./pgdata:/var/lib/postgresql/data
+        healthcheck:
+            test: "pg_isready --username=postgres && psql --username=postgres --list"
+            timeout: 2s
+            retries: 20

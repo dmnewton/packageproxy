@@ -23,7 +23,7 @@ class Package(db.Model):
 
 @app.route('/packages/<id>', methods=['GET'])
 def get_package(id):
-  package = package.query.get(id)
+  package = Package.query.get(id)
   del package.__dict__['_sa_instance_state']
   return jsonify(package.__dict__)
 

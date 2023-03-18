@@ -1,7 +1,6 @@
-from flask import Flask, request, flash, url_for, redirect, render_template, jsonify
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import os
-
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
@@ -10,7 +9,7 @@ app.config['SECRET_KEY'] = "random string"
 
 db = SQLAlchemy(app)
 
-class Package(db.Model):
+class Packages(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   blackwhite = db.Column(db.String(1), unique=False, nullable=False)
   regex = db.Column(db.String(80), unique=False, nullable=False)
@@ -39,11 +38,13 @@ class Clients(db.Model):
     self.server = body['server']
     self.description = body['description']
 
-tables = { 'packages': Package, 'repositories' : Repositories, 'clients' : Clients}
+# add table to dictionary to link URL base and table
+
+tables = { 'packages': Packages, 'repositories' : Repositories, 'clients' : Clients}
 
 @app.route('/<table>/<id>', methods=['GET'])
 def get_package(table,id):
-  package = db.session.get(Package,id)
+  package = db.session.get(Packages,id)
   del package.__dict__['_sa_instance_state']
   return jsonify(package.__dict__)
 
@@ -82,7 +83,7 @@ def update_package(table,id):
   tab = tables.get(table)
   body = request.get_json()
   d_body=copy_body_to_dict(body,tab)
-  rows_updated=db.session.query(Package).filter_by(id=id).update(d_body)
+  rows_updated=db.session.query(Packages).filter_by(id=id).update(d_body)
   db.session.commit()
   return f"rows updated {rows_updated}"
 

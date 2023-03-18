@@ -3,10 +3,12 @@ version: "3.7"
 services:
            
     backend-service:
+        container_name: backend
         image: python-base
         build:
+            context: ./.
             dockerfile: Dockerfile
-            context: ./
+
         working_dir: /app
         command: python3 proxypy/proxy.py
         restart: "no"
@@ -17,7 +19,7 @@ services:
             - https_proxy=*** your value ***
             - http_proxy=*** your value ***
             - no_proxy=**** your value ***
-        container_name: backend
+
         volumes:
             - ./:/app
         depends_on:
@@ -29,6 +31,7 @@ services:
         image: python-base
         working_dir: /app
         command: python3 proxypy/db_api.py
+        #command: bash -c "while true; do echo hello; sleep 60; done"
         ports:
             - "5000:5000"
         environment:

@@ -13,51 +13,87 @@ db = SQLAlchemy(app)
 class Package(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   blackwhite = db.Column(db.String(1), unique=False, nullable=False)
-  regex = db.Column(db.String(80), unique=True, nullable=False)
-  description = db.Column(db.String(120), unique=True, nullable=False)
+  regex = db.Column(db.String(80), unique=False, nullable=False)
+  description = db.Column(db.String(120), unique=False, nullable=False)
 
-  def __init__(self, blackwhite,regex, description):
-    self.blackwhite = blackwhite
-    self.regex = regex
-    self.description = description
+  def __init__(self, body):
+    self.blackwhite = body['blackwhite']
+    self.regex = body['regex']
+    self.description = body['description']
 
-@app.route('/packages/<id>', methods=['GET'])
-def get_package(id):
-  package = Package.query.get(id)
+class Repositories(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  server = db.Column(db.String(80), unique=True, nullable=False)
+  description = db.Column(db.String(120), unique=False, nullable=False)
+
+  def __init__(self, body):
+    self.server = body['server']
+    self.description = body['description']
+
+class Clients(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  server = db.Column(db.String(80), unique=True, nullable=False)
+  description = db.Column(db.String(120), unique=False, nullable=False)
+
+  def __init__(self, body):
+    self.server = body['server']
+    self.description = body['description']
+
+tables = { 'packages': Package, 'repositories' : Repositories, 'clients' : Clients}
+
+@app.route('/<table>/<id>', methods=['GET'])
+def get_package(table,id):
+  package = db.session.get(Package,id)
   del package.__dict__['_sa_instance_state']
   return jsonify(package.__dict__)
 
-@app.route('/packages', methods=['GET'])
-def get_packages():
+@app.route('/<table>', methods=['GET'])
+def get_packages(table):
+  tab = tables.get(table)
   packages = []
-  for package in db.session.query(Package).all():
+  for package in db.session.query(tab).all():
     del package.__dict__['_sa_instance_state']
     packages.append(package.__dict__)
-  app.logger.info("packages %s",packages)
   return jsonify(packages)
 
-@app.route('/packages', methods=['POST'])
-def create_package():
+def copy_body_to_dict(body,tab):
+    """copied only required fields"""
+    res = dict()
+    columns =tab.__table__.columns
+    for col in columns:
+      try:
+        res[col.name] = body[col.name]
+      except:
+        continue
+    return res
+
+@app.route('/<table>', methods=['POST'])
+def create_package(table):
+  tab = tables.get(table)
+  #app.logger.info("xxx %s",tab.__table__.c)
   body = request.get_json()
-  db.session.add(Package(body['blackwhite'],body['regex'], body['description']))
+  d_body=copy_body_to_dict(body,tab)
+  db.session.add(tab(d_body))
   db.session.commit()
   return "package created"
 
-@app.route('/packages/<id>', methods=['PUT'])
-def update_package(id):
+@app.route('/<table>/<id>', methods=['PUT'])
+def update_package(table,id):
+  tab = tables.get(table)
   body = request.get_json()
-  db.session.query(Package).filter_by(id=id).update(
-    dict(blackwhite=body['blackwhite'],regex=body['regex'], description=body['description']))
+  d_body=copy_body_to_dict(body,tab)
+  rows_updated=db.session.query(Package).filter_by(id=id).update(d_body)
   db.session.commit()
-  return "package updated"
+  return f"rows updated {rows_updated}"
 
-@app.route('/packages/<id>', methods=['DELETE'])
-def delete_package(id):
-  db.session.query(Package).filter_by(id=id).delete()
+@app.route('/<table>/<id>', methods=['DELETE'])
+def delete_package(table,id):
+  tab = tables.get(table)
+  rows_deleted=db.session.query(tab).filter_by(id=id).delete()
   db.session.commit()
-  return "package deleted"
+  return f"rows deleted {rows_deleted}"
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(host='0.0.0.0',debug = True)
+    app.run(host='0.0.0.0',debug = True, use_reloader= False)
